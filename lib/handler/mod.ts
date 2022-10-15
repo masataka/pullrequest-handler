@@ -10,9 +10,9 @@ export default SlackFunction(
     const payload = inputs.payload as PullRequestEvent;
     const text = `${payload.action}: PR#${payload.pull_request.number}`;
     console.log(text);
-    await client.chat.postMessage({
-      channel: env["slackChannel"],
-      text,
+    const channel = env["slackChannel"];
+    await client.chat.postMessage({ channel, text }).catch((e) => {
+      console.error(e);
     });
     return { outputs: {} };
   },
