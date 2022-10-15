@@ -8,9 +8,11 @@ export default SlackFunction(
   async ({ inputs, env, token }) => {
     const client = SlackAPI(token);
     const payload = inputs.payload as PullRequestEvent;
+    const text = `${payload.action}: PR#${payload.pull_request.number}`;
+    console.log(text);
     await client.chat.postMessage({
       channel: env["slackChannel"],
-      text: `${payload.action}: PR#${payload.pull_request.number}`,
+      text,
     });
     return { outputs: {} };
   },
