@@ -11,8 +11,11 @@ export default SlackFunction(
     const text = `${payload.action}: PR#${payload.pull_request.number}`;
     console.log(text);
     const channel = env["slackChannel"];
+    console.log(channel);
     await client.chat.postMessage({ channel, text }).catch((e) => {
       console.error(e);
+    }).then((result) => {
+      console.log(result);
     });
     return { outputs: {} };
   },
