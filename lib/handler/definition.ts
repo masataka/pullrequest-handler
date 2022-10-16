@@ -6,12 +6,14 @@ export default DefineFunction({
   source_file: "lib/handler/mod.ts",
   input_parameters: {
     properties: {
+      signature: {
+        type: Schema.types.string,
+      },
       payload: {
         type: Schema.types.object,
-        description: "Github Webhook Payload",
       },
     },
-    required: ["payload"],
+    required: ["signature", "payload"],
   },
   output_parameters: {
     properties: {},

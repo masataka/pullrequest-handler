@@ -6,15 +6,19 @@ const defaultWorkflow = DefineWorkflow({
   title: "Handle webhook payload",
   input_parameters: {
     properties: {
+      signature: {
+        type: Schema.types.string,
+      },
       payload: {
         type: Schema.types.object,
       },
     },
-    required: ["payload"],
+    required: ["signature", "payload"],
   },
 });
 
 defaultWorkflow.addStep(handler, {
+  signature: defaultWorkflow.inputs.signature,
   payload: defaultWorkflow.inputs.payload,
 });
 
