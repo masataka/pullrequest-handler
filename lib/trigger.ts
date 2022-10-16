@@ -8,7 +8,7 @@ const defaultTrigger: Trigger<typeof defaultWorkflow.definition> = {
   inputs: {
     signature: {
       // 現在のところ、リクエストヘッダへのアクセス方法が不明で値が取れない。
-      value: "{{header.X-Hub-Signature-256}}",
+      value: "{{headers.X-Hub-Signature-256}}",
     },
     payload: {
       value: "{{data}}",

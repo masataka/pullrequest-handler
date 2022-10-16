@@ -1,16 +1,16 @@
 import { DefineFunction, Schema } from "deno-slack-sdk/mod.ts";
 
 export default DefineFunction({
-  callback_id: "handler",
-  title: "Handle GitHub Webhook Payload",
-  source_file: "lib/handler/mod.ts",
+  callback_id: "verifier",
+  title: "Verify Request",
+  source_file: "lib/verifier/mod.ts",
   input_parameters: {
     properties: {
-      payload: {
-        type: Schema.types.object,
+      signature: {
+        type: Schema.types.string,
       },
     },
-    required: ["payload"],
+    required: ["signature"],
   },
   output_parameters: {
     properties: {},

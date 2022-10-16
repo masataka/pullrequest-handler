@@ -8,8 +8,7 @@ export default SlackFunction(
   async ({ inputs, env, token }) => {
     const client = SlackAPI(token);
     const payload = inputs.payload as PullRequestEvent;
-    const text =
-      `${payload.action}: PR#${payload.pull_request.number}, signature: ${inputs.signature}`;
+    const text = `${payload.action}: PR#${payload.pull_request.number}`;
     console.log(text);
     const channel = env["slackChannel"];
     console.log(channel);

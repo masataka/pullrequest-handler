@@ -1,4 +1,5 @@
 import { DefineWorkflow, Schema } from "deno-slack-sdk/mod.ts";
+import verifier from "./verifier/definition.ts";
 import handler from "./handler/definition.ts";
 
 const defaultWorkflow = DefineWorkflow({
@@ -17,8 +18,11 @@ const defaultWorkflow = DefineWorkflow({
   },
 });
 
-defaultWorkflow.addStep(handler, {
+defaultWorkflow.addStep(verifier, {
   signature: defaultWorkflow.inputs.signature,
+});
+
+defaultWorkflow.addStep(handler, {
   payload: defaultWorkflow.inputs.payload,
 });
 
