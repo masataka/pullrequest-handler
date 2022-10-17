@@ -9,8 +9,11 @@ export default DefineFunction({
       signature: {
         type: Schema.types.string,
       },
+      payload: {
+        type: Schema.types.object,
+      },
     },
-    required: ["signature"],
+    required: ["signature", "payload"],
   },
   output_parameters: {
     properties: {},

@@ -20,6 +20,7 @@ const defaultWorkflow = DefineWorkflow({
 
 defaultWorkflow.addStep(verifier, {
   signature: defaultWorkflow.inputs.signature,
+  payload: defaultWorkflow.inputs.payload,
 });
 
 defaultWorkflow.addStep(handler, {
