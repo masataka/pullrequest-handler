@@ -6,9 +6,7 @@ const githubWebhookTrigger: Trigger<typeof notifyPullRequest.definition> = {
   name: "githubWebhookTrigger",
   workflow: "#/workflows/notifyPullRequest",
   inputs: {
-    payload: {
-      value: "{{data}}",
-    },
+    payload: { value: "{{data}}" },
   },
 };
 

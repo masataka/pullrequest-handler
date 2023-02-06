@@ -8,15 +8,7 @@ export const handleWebhook = DefineFunction({
   source_file: "functions/handleWebhook.ts",
   input_parameters: {
     properties: {
-      repos: {
-        type: Schema.types.object,
-      },
-      accounts: {
-        type: Schema.types.object,
-      },
-      payload: {
-        type: Schema.types.object,
-      },
+      payload: { type: Schema.types.object },
     },
     required: ["payload"],
   },
