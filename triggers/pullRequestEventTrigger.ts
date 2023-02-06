@@ -1,7 +1,7 @@
 import { Trigger } from "deno-slack-api/types.ts";
 import { notifyPullRequest } from "../workflows/notifyPullRequest.ts";
 
-const githubWebhookTrigger: Trigger<typeof notifyPullRequest.definition> = {
+const pullrequestEventTrigger: Trigger<typeof notifyPullRequest.definition> = {
   type: "webhook",
   name: "githubWebhookTrigger",
   workflow: "#/workflows/notifyPullRequest",
@@ -10,4 +10,4 @@ const githubWebhookTrigger: Trigger<typeof notifyPullRequest.definition> = {
   },
 };
 
-export default githubWebhookTrigger;
+export default pullrequestEventTrigger;
