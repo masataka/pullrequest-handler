@@ -1,6 +1,7 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { SlackAPI } from "deno-slack-api/mod.ts";
-import type { PullRequestEvent } from "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts";
+
+import { Webhook } from "./customTypes.ts";
 
 export const handleWebhookFunction = DefineFunction({
   callback_id: "handleWebhook",
@@ -8,9 +9,12 @@ export const handleWebhookFunction = DefineFunction({
   source_file: "functions/handleWebhookFunction.ts",
   input_parameters: {
     properties: {
-      payload: { type: Schema.types.object },
+      webhookContext: { type: Webhook },
+      githubToken: { type: Schema.types.string },
+      slackChannel: { type: Schema.types.string },
+      userMap: { type: Schema.types.object },
     },
-    required: ["payload"],
+    required: [],
   },
 });
 
@@ -18,15 +22,10 @@ export default SlackFunction(
   handleWebhookFunction,
   async ({ inputs, env, token }) => {
     const client = SlackAPI(token);
-    const payload = inputs.payload as PullRequestEvent;
-    const text = `${payload.action}: PR#${payload.pull_request.number}`;
-    console.log(text);
-    const channel = env["slackChannel"];
-    console.log(channel);
+    const channel = inputs.slackChannel || env["slackChannel"];
+    const text = JSON.stringify(inputs.webhookContext);
     await client.chat.postMessage({ channel, text }).catch((e) => {
       console.error(e);
-    }).then((result) => {
-      console.log(result);
     });
     return { outputs: {} };
   },
