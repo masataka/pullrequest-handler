@@ -5,7 +5,7 @@
 To create a Link Trigger, run the following command:
 
 ```zsh
-$ slack trigger create --trigger-def lib/trigger.ts
+$ slack trigger create --trigger-def triggers/pullRequestEventTrigger.ts
 ```
 
 After selecting a Workspace, the output provided will include the Link Trigger
