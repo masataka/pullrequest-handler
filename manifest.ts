@@ -14,7 +14,7 @@ export default Manifest({
   icon: "assets/icon.png",
   types: [GithubName, GithubRepository, Webhook],
   workflows: [notifyPullRequestWorkflow],
-  outgoingDomains: ["github.com"],
+  outgoingDomains: ["api.github.com", "esm.sh"],
   datastores: [repositoryMapDatastore, userMapDatastore],
   botScopes: [
     "chat:write",
