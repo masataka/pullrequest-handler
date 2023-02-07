@@ -1,13 +1,15 @@
 import { Trigger } from "deno-slack-api/types.ts";
-import { notifyPullRequest } from "../workflows/notifyPullRequest.ts";
+import { notifyPullRequestWorkflow } from "../workflows/notifyPullRequestWorkflow.ts";
 
-const pullrequestEventTrigger: Trigger<typeof notifyPullRequest.definition> = {
+const pullRequestEventTrigger: Trigger<
+  typeof notifyPullRequestWorkflow.definition
+> = {
   type: "webhook",
-  name: "githubWebhookTrigger",
-  workflow: "#/workflows/notifyPullRequest",
+  name: "pullRequestEvent",
+  workflow: "#/workflows/notifyPullRequestWorkflow",
   inputs: {
     payload: { value: "{{data}}" },
   },
 };
 
-export default pullrequestEventTrigger;
+export default pullRequestEventTrigger;

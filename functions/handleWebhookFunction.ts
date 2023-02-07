@@ -2,10 +2,10 @@ import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { SlackAPI } from "deno-slack-api/mod.ts";
 import type { PullRequestEvent } from "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts";
 
-export const handleWebhook = DefineFunction({
+export const handleWebhookFunction = DefineFunction({
   callback_id: "handleWebhook",
-  title: "handleWebhook",
-  source_file: "functions/handleWebhook.ts",
+  title: "Handle Webhook",
+  source_file: "functions/handleWebhookFunction.ts",
   input_parameters: {
     properties: {
       payload: { type: Schema.types.object },
@@ -15,7 +15,7 @@ export const handleWebhook = DefineFunction({
 });
 
 export default SlackFunction(
-  handleWebhook,
+  handleWebhookFunction,
   async ({ inputs, env, token }) => {
     const client = SlackAPI(token);
     const payload = inputs.payload as PullRequestEvent;

@@ -1,15 +1,15 @@
 import { Manifest } from "deno-slack-sdk/mod.ts";
-import { repoMap } from "./datastores/repoMap.ts";
-import { userMap } from "./datastores/userMap.ts";
-import { notifyPullRequest } from "./workflows/notifyPullRequest.ts";
+import { repositoryMapDatastore } from "./datastores/repositoryMapDatastore.ts";
+import { userMapDatastore } from "./datastores/userMapDatastore.ts";
+import { notifyPullRequestWorkflow } from "./workflows/notifyPullRequestWorkflow.ts";
 
 export default Manifest({
   name: "PullRequest Handler",
   description: "Notify a Slack channel of incoming Github pull request events",
   icon: "assets/icon.png",
-  workflows: [notifyPullRequest],
+  workflows: [notifyPullRequestWorkflow],
   outgoingDomains: ["github.com"],
-  datastores: [repoMap, userMap],
+  datastores: [repositoryMapDatastore, userMapDatastore],
   botScopes: [
     "chat:write",
     "channels:history",
