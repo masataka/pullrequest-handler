@@ -8,7 +8,7 @@ export default Manifest({
   description: "Notify a Slack channel of incoming Github pull request events",
   icon: "assets/icon.png",
   workflows: [notifyPullRequestWorkflow],
-  outgoingDomains: ["api.github.com", "esm.sh"],
+  outgoingDomains: ["api.github.com"],
   datastores: [repositoryMapDatastore, userMapDatastore],
   botScopes: [
     "chat:write",

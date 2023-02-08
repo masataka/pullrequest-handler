@@ -4,7 +4,6 @@ import type {
   PullRequestEvent,
   PullRequestReviewEvent,
 } from "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts";
-import ky from "https://esm.sh/ky@0.33.2";
 import type {
   ActualGraph,
   GitHubUser,
@@ -214,24 +213,30 @@ export default SlackFunction(
     console.log({ webhookContext, githubToken, slackChannel, userMap });
 
     //getActualGraph
-    // kyが怪しい。fetchで書き直す
-    const result = await ky.post("https://api.github.com/graphql", {
-      headers: { Authorization: `Bearer ${githubToken}` },
-      json: {
+    const response = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      body: JSON.stringify({
         query: pull_request_graph_query,
         variables: {
           owner: webhookContext.repository.owner.login,
           name: webhookContext.repository.name,
           pullRequestNumber: webhookContext.pullRequestNumber,
         },
+      }),
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
+        "content-type": "application/json",
       },
-    }).json<{ data: ActualGraph }>();
+    });
+    if (!response.ok) {
+      throw new Error(`Fetch error: ${response.statusText}`);
+    }
+    const json = await response.json() as { data: ActualGraph };
 
     //renderMessageBlock
     const blocks = JSXSlack(
-      PullRequest({ ...webhookContext, userMap, ...result.data }),
+      PullRequest({ ...webhookContext, userMap, ...json.data }),
     );
-    console.log(blocks);
 
     // postMessageBlockWithMetadata
     const slackAPI = SlackAPI(token);
