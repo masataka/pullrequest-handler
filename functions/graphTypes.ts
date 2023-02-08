@@ -41,7 +41,7 @@ export type PullRequest<C extends Partial<Commit>> = {
   mergeCommit: C | null;
   mergeable: string; // 'CONFLICTING' | 'MERGEABLE' | 'UNKNOWN';
   merged: boolean;
-  number: number;
+  pullRequestNumber: number;
   reviewRequests: Connection<ReviewRequest>;
   reviews: Connection<Review>;
   state: string; // 'CLOSED' | 'MERGED' | 'OPEN';
@@ -76,6 +76,9 @@ export type KeyValueStore<T> = {
   [key: string]: T;
 };
 
-export type RenderModel = ActualGraph & WebhookContext & {
-  userMap: KeyValueStore<string>;
-};
+export type RenderModel =
+  & Omit<WebhookContext, "repository">
+  & ActualGraph
+  & {
+    userMap: KeyValueStore<string>;
+  };

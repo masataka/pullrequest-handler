@@ -141,14 +141,14 @@ export function Commits(props: RenderModel) {
 }
 
 export function Contents(props: RenderModel) {
-  const { url, number, body } = props.repository.pullRequest;
+  const { url, pullRequestNumber, body } = props.repository.pullRequest;
   const text = body && body.trim();
   return (
     <Fragment>
       <Header>{props.repository.pullRequest.title}</Header>
       <Section>
         <b>
-          <a href={url}>#{number}</a>
+          <a href={url}>#{pullRequestNumber}</a>
         </b>
       </Section>
       {text ? <Description text={text} /> : (
@@ -244,7 +244,7 @@ export function Repository(props: RenderModel) {
   const org = <a href={owner.url}>{owner.login}</a>;
   const repo = <a href={url}>{name}</a>;
   const pulls = <a href={`${props.repository.url}/pulls`}>pull</a>;
-  const pull = <a href={pullRequest.url}>{pullRequest.number}</a>;
+  const pull = <a href={pullRequest.url}>{pullRequest.pullRequestNumber}</a>;
   return (
     <Context>
       <span>{githubcom} / {org} / {repo} / {pulls} / {pull}</span>

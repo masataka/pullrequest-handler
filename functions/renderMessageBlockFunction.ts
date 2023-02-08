@@ -6,6 +6,7 @@ import type {
   WebhookContext,
 } from "./graphTypes.ts";
 import { PullRequest } from "./renderers/messageRenderer.tsx";
+import { JSXSlack } from "npm:jsx-slack@5";
 
 export const renderMessageBlockFunction = DefineFunction({
   callback_id: "renderMessageBlock",
@@ -21,9 +22,9 @@ export const renderMessageBlockFunction = DefineFunction({
   },
   output_parameters: {
     properties: {
-      block: { type: Schema.types.object },
+      blocks: { type: Schema.types.object },
     },
-    required: ["block"],
+    required: ["blocks"],
   },
 });
 
@@ -33,8 +34,10 @@ export default SlackFunction(
     const webhookContext = inputs.webhookContext as WebhookContext;
     const userMap = inputs.userMap as KeyValueStore<string>;
     const actualGraph = inputs.actualGraph as ActualGraph;
-    const block = PullRequest({ ...webhookContext, userMap, ...actualGraph });
-    console.log(block);
-    return { outputs: { block } };
+    const blocks = JSXSlack(
+      PullRequest({ ...webhookContext, userMap, ...actualGraph }),
+    );
+    console.log(blocks);
+    return { outputs: { blocks } };
   },
 );
