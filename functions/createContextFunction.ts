@@ -57,7 +57,9 @@ export default SlackFunction(
       datastore: "repositoryMap",
       id: url,
     });
-    const slackChannel = r1.ok ? r1.item["slackChannel"] : env["slackChannel"] || "";
+    const slackChannel = r1.ok
+      ? r1.item["slackChannel"]
+      : env["slackChannel"] || "";
 
     const r2 = await client.apps.datastore.query({
       datastore: "userMap",
