@@ -1,5 +1,5 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
-import ky from "https://esm.sh/ky";
+import ky from "https://esm.sh/ky@0.33.2";
 
 export const getActualGraphFunction = DefineFunction({
   callback_id: "getActualGraph",
@@ -136,10 +136,12 @@ query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
 export default SlackFunction(
   getActualGraphFunction,
   async ({ inputs }) => {
-    const actualGraph = await ky.post("https://api.github.com/graphql", {
+    const result = await ky.post("https://api.github.com/graphql", {
       headers: { Authorization: `Bearer ${inputs.githubToken}` },
       json: { query: pull_request_graph_query, variables: inputs },
-    }).json();
+      // deno-lint-ignore no-explicit-any
+    }).json<{ data: any }>();
+    const actualGraph = result["data"];
     return { outputs: { actualGraph } };
   },
 );

@@ -1,8 +1,8 @@
 import { Manifest } from "deno-slack-sdk/mod.ts";
 import {
-  GithubName,
-  GithubRepository,
-  WebhookContext,
+  GitHubRepositoryType,
+  GitHubUserType,
+  WebhookContextType,
 } from "./functions/customTypes.ts";
 import { repositoryMapDatastore } from "./datastores/repositoryMapDatastore.ts";
 import { userMapDatastore } from "./datastores/userMapDatastore.ts";
@@ -12,7 +12,7 @@ export default Manifest({
   name: "PullRequest Handler",
   description: "Notify a Slack channel of incoming Github pull request events",
   icon: "assets/icon.png",
-  types: [GithubName, GithubRepository, WebhookContext],
+  types: [GitHubUserType, GitHubRepositoryType, WebhookContextType],
   workflows: [notifyPullRequestWorkflow],
   outgoingDomains: ["api.github.com", "esm.sh"],
   datastores: [repositoryMapDatastore, userMapDatastore],

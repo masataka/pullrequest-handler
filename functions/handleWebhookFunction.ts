@@ -8,9 +8,9 @@ export const handleWebhookFunction = DefineFunction({
   input_parameters: {
     properties: {
       slackChannel: { type: Schema.types.string },
-      contents: { type: Schema.types.object },
+      block: { type: Schema.types.object },
     },
-    required: ["slackChannel", "contents"],
+    required: ["slackChannel", "block"],
   },
 });
 
@@ -20,7 +20,7 @@ export default SlackFunction(
     const client = SlackAPI(token);
     await client.chat.postMessage({
       channel: inputs.slackChannel,
-      text: JSON.stringify(inputs.contents),
+      text: JSON.stringify(inputs.block),
     }).catch((e) => {
       console.error(e);
     });

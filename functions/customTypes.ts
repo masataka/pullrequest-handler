@@ -1,7 +1,6 @@
 import { DefineType, Schema } from "deno-slack-sdk/mod.ts";
-
-export const GithubName = DefineType({
-  name: "githubName",
+export const GitHubUserType = DefineType({
+  name: "GitHubUser",
   type: Schema.types.object,
   properties: {
     login: { type: Schema.types.string },
@@ -9,24 +8,26 @@ export const GithubName = DefineType({
   },
 });
 
-export const GithubRepository = DefineType({
-  name: "githubRepository",
+export const GitHubRepositoryType = DefineType({
+  name: "GitHubRepository",
   type: Schema.types.object,
   properties: {
-    owner: { type: GithubName },
+    owner: { type: GitHubUserType },
     name: { type: Schema.types.string },
     url: { type: Schema.types.string },
   },
 });
 
-export const WebhookContext = DefineType({
-  name: "webhook",
+export const WebhookContextType = DefineType({
+  name: "Webhook",
   type: Schema.types.object,
   properties: {
-    sender: { type: GithubName },
+    sender: { type: GitHubUserType },
     event: { type: Schema.types.string },
     action: { type: Schema.types.string },
-    repository: { type: GithubRepository },
+    repository: { type: GitHubRepositoryType },
     pullRequestNumber: { type: Schema.types.number },
+    //requestedReviewer
+    //review
   },
 });

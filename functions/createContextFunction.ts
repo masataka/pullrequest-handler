@@ -3,7 +3,8 @@ import type {
   PullRequestEvent,
   PullRequestReviewEvent,
 } from "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts";
-import { WebhookContext } from "./customTypes.ts";
+import { WebhookContextType } from "./customTypes.ts";
+import { GitHubUser, Review, WebhookContext } from "./graphTypes.ts";
 
 export const createContextFunction = DefineFunction({
   callback_id: "createContext",
@@ -17,7 +18,7 @@ export const createContextFunction = DefineFunction({
   },
   output_parameters: {
     properties: {
-      webhookContext: { type: WebhookContext },
+      webhookContext: { type: WebhookContextType },
       githubToken: { type: Schema.types.string },
       slackChannel: { type: Schema.types.string },
       userMap: { type: Schema.types.object },
@@ -29,33 +30,65 @@ export const createContextFunction = DefineFunction({
 export default SlackFunction(
   createContextFunction,
   async ({ inputs, env, client }) => {
-    const payload = inputs.payload as PullRequestEvent & PullRequestReviewEvent;
-    const { sender, action, repository, pull_request, review } = payload;
-    const url = repository.html_url;
+    const payload = inputs.payload as PullRequestEvent;
+    const { sender, action, repository, pull_request } = payload;
 
-    const webhookContext = {
+    let requestedReviewer: GitHubUser | undefined;
+    if (inputs.payload.requested_reviewer !== undefined) {
+      requestedReviewer = {
+        login: inputs.payload.requested_reviewer.login,
+        url: inputs.payload.requested_reviewer.html_url,
+      };
+    } else if (inputs.payload.requested_team !== undefined) {
+      requestedReviewer = {
+        login: inputs.payload.requested_team.name,
+        url: inputs.payload.requested_team.html_url,
+      };
+    }
+
+    const event = inputs.payload.review !== undefined
+      ? "pull_request_review"
+      : "pull_request";
+
+    let review: Review | undefined;
+    if (event === "pull_request_review") {
+      const reviewEvent = inputs.payload as PullRequestReviewEvent;
+      review = {
+        author: {
+          login: reviewEvent.review.user.login,
+          url: reviewEvent.review.user.html_url,
+        },
+        body: reviewEvent.review.body,
+        state: reviewEvent.review.state.toUpperCase(),
+        updatedAt: reviewEvent.review.submitted_at,
+      };
+    }
+
+    const webhookContext: WebhookContext = {
       sender: {
         login: sender.login,
         url: sender.html_url,
       },
-      event: review ? "pull_request_review" : "pull_request",
+      event,
       action,
       repository: {
         owner: {
           login: repository.owner.login,
-          url,
+          url: repository.owner.html_url,
         },
         name: repository.name,
         url: repository.html_url,
       },
       pullRequestNumber: pull_request.number,
+      requestedReviewer,
+      review,
     };
 
     const githubToken = env["githubToken"] || "";
 
     const r1 = await client.apps.datastore.get({
       datastore: "repositoryMap",
-      id: url,
+      id: repository.html_url,
     });
     const slackChannel = r1.ok
       ? r1.item["slackChannel"]
