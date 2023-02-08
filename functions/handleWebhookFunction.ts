@@ -10,17 +10,18 @@ export const handleWebhookFunction = DefineFunction({
       slackChannel: { type: Schema.types.string },
       contents: { type: Schema.types.object },
     },
-    required: [],
+    required: ["slackChannel", "contents"],
   },
 });
 
 export default SlackFunction(
   handleWebhookFunction,
-  async ({ inputs, env, token }) => {
+  async ({ inputs, token }) => {
     const client = SlackAPI(token);
-    const channel = inputs.slackChannel || env["slackChannel"];
-    const text = JSON.stringify(inputs.contents);
-    await client.chat.postMessage({ channel, text }).catch((e) => {
+    await client.chat.postMessage({
+      channel: inputs.slackChannel,
+      text: JSON.stringify(inputs.contents),
+    }).catch((e) => {
       console.error(e);
     });
     return { outputs: {} };

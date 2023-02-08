@@ -3,7 +3,7 @@ import type {
   PullRequestEvent,
   PullRequestReviewEvent,
 } from "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts";
-import { Webhook } from "./customTypes.ts";
+import { WebhookContext } from "./customTypes.ts";
 
 export const createContextFunction = DefineFunction({
   callback_id: "createContext",
@@ -17,12 +17,12 @@ export const createContextFunction = DefineFunction({
   },
   output_parameters: {
     properties: {
-      webhookContext: { type: Webhook },
+      webhookContext: { type: WebhookContext },
       githubToken: { type: Schema.types.string },
       slackChannel: { type: Schema.types.string },
       userMap: { type: Schema.types.object },
     },
-    required: [],
+    required: ["webhookContext", "githubToken", "slackChannel", "userMap"],
   },
 });
 
@@ -30,10 +30,6 @@ export default SlackFunction(
   createContextFunction,
   async ({ inputs, env, client }) => {
     const payload = inputs.payload as PullRequestEvent & PullRequestReviewEvent;
-    if (!payload.pull_request) {
-      return { outputs: {} };
-    }
-
     const { sender, action, repository, pull_request, review } = payload;
     const url = repository.html_url;
 
@@ -55,13 +51,13 @@ export default SlackFunction(
       pullRequestNumber: pull_request.number,
     };
 
-    const githubToken = env["githubToken"];
+    const githubToken = env["githubToken"] || "";
 
     const r1 = await client.apps.datastore.get({
       datastore: "repositoryMap",
       id: url,
     });
-    const slackChannel = r1.ok ? r1.item["slackChannel"] : env["slackChannel"];
+    const slackChannel = r1.ok ? r1.item["slackChannel"] : env["slackChannel"] || "";
 
     const r2 = await client.apps.datastore.query({
       datastore: "userMap",

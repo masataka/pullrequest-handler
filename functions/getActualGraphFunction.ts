@@ -18,7 +18,7 @@ export const getActualGraphFunction = DefineFunction({
     properties: {
       actualGraph: { type: Schema.types.object },
     },
-    required: [],
+    required: ["actualGraph"],
   },
 });
 
@@ -90,7 +90,7 @@ query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
             }
             mergeable
             merged
-            number
+            pullRequestNumber: number
             reviewRequests(last: 100) {
                 totalCount
                 edges {

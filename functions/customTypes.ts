@@ -19,7 +19,7 @@ export const GithubRepository = DefineType({
   },
 });
 
-export const Webhook = DefineType({
+export const WebhookContext = DefineType({
   name: "webhook",
   type: Schema.types.object,
   properties: {
