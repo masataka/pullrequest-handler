@@ -1,17 +1,9 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { SlackAPI } from "deno-slack-api/mod.ts";
-import type {
-  PullRequestEvent,
-  PullRequestReviewEvent,
-} from "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts";
-import type {
-  ActualGraph,
-  GitHubUser,
-  Review,
-  WebhookContext,
-} from "./graphTypes.ts";
-import { PullRequest } from "./renderers/messageRenderer.tsx";
+import { PullRequest } from "./engine/messageRenderer.tsx";
 import { JSXSlack } from "npm:jsx-slack@5";
+import createContext from "./engine/createContext.ts";
+import getActualGraph from "./engine/getActualGraph.ts";
 
 export const handleWebhookFunction = DefineFunction({
   callback_id: "handleWebhook",
@@ -25,217 +17,56 @@ export const handleWebhookFunction = DefineFunction({
   },
 });
 
-const pull_request_graph_query = `
-query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
-    repository(owner: $owner, name: $name) {
-        name
-        owner {
-            login
-            url
-        }
-        pullRequest(number: $pullRequestNumber) {
-            author {
-                login
-                url
-            }
-            baseRefName
-            body
-            changedFiles
-            commits(last: 1) {
-                totalCount
-                edges {
-                    node {
-                        commit {
-                            messageBody
-                            messageHeadline
-                            sha: oid
-                            checkSuites(first: 100) {
-                                totalCount
-                                edges {
-                                    node {
-                                        checkRuns(first: 100) {
-                                            totalCount
-                                            edges {
-                                                node {
-                                                    name
-                                                    conclusion
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            headRefName
-            mergeCommit {
-                messageBody
-                messageHeadline
-                sha: oid
-                checkSuites(first: 100) {
-                    totalCount
-                    edges {
-                        node {
-                            checkRuns(first: 100) {
-                                totalCount
-                                edges {
-                                    node {
-                                        name
-                                        conclusion
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            mergeable
-            merged
-            pullRequestNumber: number
-            reviewRequests(last: 100) {
-                totalCount
-                edges {
-                    node {
-                        requestedReviewer {
-                            ... on Team {
-                                __typename
-                                login: name
-                                url
-                            }
-                            ... on User {
-                                __typename
-                                login
-                                url
-                            }
-                        }
-                    }
-                }
-            }
-            reviews(last: 100) {
-                totalCount
-                edges {
-                    node {
-                    author {
-                        login
-                        url
-                    }
-                    body
-                    state
-                    updatedAt
-                    }
-                }
-            }
-            state
-            title
-            url
-        }
-        url
-    }
-}
-`;
-
 export default SlackFunction(
   handleWebhookFunction,
-  async ({ inputs, env, token, client }) => {
-    // createContextFunction
-    const payload = inputs.payload as PullRequestEvent;
-    const { sender, action, repository, pull_request } = payload;
-
-    let requestedReviewer: GitHubUser | undefined;
-    if (inputs.payload.requested_reviewer !== undefined) {
-      requestedReviewer = {
-        login: inputs.payload.requested_reviewer.login,
-        url: inputs.payload.requested_reviewer.html_url,
-      };
-    } else if (inputs.payload.requested_team !== undefined) {
-      requestedReviewer = {
-        login: inputs.payload.requested_team.name,
-        url: inputs.payload.requested_team.html_url,
-      };
+  async ({ inputs, client, env, token }) => {
+    // payload -> context
+    const webhookContext = createContext(inputs.payload);
+    if (webhookContext === null) {
+      return { outputs: {} };
     }
 
-    const event = inputs.payload.review !== undefined
-      ? "pull_request_review"
-      : "pull_request";
-
-    let review: Review | undefined;
-    if (event === "pull_request_review") {
-      const reviewEvent = inputs.payload as PullRequestReviewEvent;
-      review = {
-        author: {
-          login: reviewEvent.review.user.login,
-          url: reviewEvent.review.user.html_url,
-        },
-        body: reviewEvent.review.body,
-        state: reviewEvent.review.state.toUpperCase(),
-        updatedAt: reviewEvent.review.submitted_at,
-      };
-    }
-
-    const webhookContext: WebhookContext = {
-      sender: {
-        login: sender.login,
-        url: sender.html_url,
-      },
-      event,
-      action,
-      repository: {
-        owner: {
-          login: repository.owner.login,
-          url: repository.owner.html_url,
-        },
-        name: repository.name,
-        url: repository.html_url,
-      },
-      pullRequestNumber: pull_request.number,
-      requestedReviewer,
-      review,
-    };
-
-    const githubToken = env["githubToken"] || "";
-
+    // settings
     const r1 = await client.apps.datastore.get({
       datastore: "repositoryMap",
-      id: repository.html_url,
+      id: webhookContext.repository.url,
     });
-    const slackChannel = r1.ok
-      ? r1.item["slackChannel"]
-      : env["slackChannel"] || "";
+    let branch = "develop";
+    let slackChannel = env["slackChannel"];
+    if (r1.ok) {
+      branch = r1.item["branch"];
+      slackChannel = r1.item["slackChannel"];
+    }
+    const githubToken = env["githubToken"];
+    console.log({ branch, slackChannel, githubToken });
+
+    if (webhookContext.baseRef !== branch) {
+      return { outputs: {} };
+    }
 
     const r2 = await client.apps.datastore.query({
       datastore: "userMap",
     });
-    const userMap = (r2.ok ? r2.items : []).reduce((previous, value) => {
-      return { ...previous, [value["githubAccount"]]: value["slackAccount"] };
-    }, {});
-    console.log({ webhookContext, githubToken, slackChannel, userMap });
-
-    //getActualGraph
-    const response = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      body: JSON.stringify({
-        query: pull_request_graph_query,
-        variables: {
-          owner: webhookContext.repository.owner.login,
-          name: webhookContext.repository.name,
-          pullRequestNumber: webhookContext.pullRequestNumber,
-        },
-      }),
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        "content-type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Fetch error: ${response.statusText}`);
+    let userMap = {};
+    if (r2.ok) {
+      userMap = r2.items.reduce((previous, value) => {
+        return { ...previous, [value["githubAccount"]]: value["slackAccount"] };
+      }, {});
     }
-    const json = await response.json() as { data: ActualGraph };
+    console.log({ userMap });
+
+    //ActualGraph
+    const actualGraph = await getActualGraph(
+      githubToken,
+      webhookContext.repository.owner.login,
+      webhookContext.repository.name,
+      webhookContext.pullRequestNumber,
+    );
+    console.log(actualGraph);
 
     //renderMessageBlock
     const blocks = JSXSlack(
-      PullRequest({ ...webhookContext, userMap, ...json.data }),
+      PullRequest({ ...webhookContext, userMap, ...actualGraph }),
     );
 
     // postMessageBlockWithMetadata

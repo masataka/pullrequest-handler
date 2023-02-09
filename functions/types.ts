@@ -1,8 +1,3 @@
-export type Connection<T> = {
-  totalCount: number;
-  edges: { node: T }[];
-};
-
 export type GitHubUser = {
   login: string;
   url: string;
@@ -17,6 +12,10 @@ export type Review = {
   body: string | null;
   state: string; // 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'DISMISSED' | 'PENDING';
   updatedAt: string | null;
+};
+export type Connection<T> = {
+  totalCount: number;
+  edges: { node: T }[];
 };
 
 export type CheckRun = {
@@ -68,6 +67,7 @@ export type WebhookContext = {
     url: string;
   };
   pullRequestNumber: number;
+  baseRef: string;
   requestedReviewer?: GitHubUser;
   review?: Review;
 };

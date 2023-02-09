@@ -1,26 +1,4 @@
-import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
-import ky from "https://esm.sh/ky@0.33.2";
-
-export const getActualGraphFunction = DefineFunction({
-  callback_id: "getActualGraph",
-  title: "Get Actual Graph",
-  source_file: "functions/getActualGraphFunction.ts",
-  input_parameters: {
-    properties: {
-      owner: { type: Schema.types.string },
-      name: { type: Schema.types.string },
-      pullRequestNumber: { type: Schema.types.number },
-      githubToken: { type: Schema.types.string },
-    },
-    required: ["owner", "name", "pullRequestNumber", "githubToken"],
-  },
-  output_parameters: {
-    properties: {
-      actualGraph: { type: Schema.types.object },
-    },
-    required: ["actualGraph"],
-  },
-});
+import type { ActualGraph } from "../types.ts";
 
 const pull_request_graph_query = `
 query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
@@ -133,15 +111,30 @@ query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
 }
 `;
 
-export default SlackFunction(
-  getActualGraphFunction,
-  async ({ inputs }) => {
-    const result = await ky.post("https://api.github.com/graphql", {
-      headers: { Authorization: `Bearer ${inputs.githubToken}` },
-      json: { query: pull_request_graph_query, variables: inputs },
-      // deno-lint-ignore no-explicit-any
-    }).json<{ data: any }>();
-    const actualGraph = result["data"];
-    return { outputs: { actualGraph } };
-  },
-);
+export default async function (
+  githubToken: string,
+  owner: string,
+  name: string,
+  pullRequestNumber: number,
+): Promise<ActualGraph> {
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    body: JSON.stringify({
+      query: pull_request_graph_query,
+      variables: {
+        owner,
+        name,
+        pullRequestNumber,
+      },
+    }),
+    headers: {
+      Authorization: `Bearer ${githubToken}`,
+      "content-type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Fetch error: ${response.statusText}`);
+  }
+  const json = await response.json() as { data: ActualGraph };
+  return json.data;
+}
