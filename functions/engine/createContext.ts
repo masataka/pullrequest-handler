@@ -2,7 +2,7 @@ import type {
   PullRequestEvent,
   PullRequestReviewEvent,
 } from "@octokit/webhooks-types";
-import type { GitHubUser, Review, WebhookContext } from "../types.ts";
+import type { GitHubUser, Review, WebhookContext } from "./types.ts";
 
 // deno-lint-ignore no-explicit-any
 export default function (payload: any): WebhookContext | null {

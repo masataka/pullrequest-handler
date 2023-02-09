@@ -13,7 +13,7 @@ import type {
   RenderModel,
   Review,
   ReviewRequest,
-} from "../graphTypes.ts";
+} from "./types.ts";
 
 export function Description(props: { text: string | null }) {
   return (props.text

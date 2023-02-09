@@ -1,7 +1,7 @@
 /** @jsxImportSource npm:jsx-slack@5 */
 import { Blocks, Context, Section } from "npm:jsx-slack@5";
 import { Description, UserLink } from "./messageRenderer.tsx";
-import type { RenderModel } from "../types.ts";
+import type { RenderModel } from "./types.ts";
 
 export function EditedLog(props: RenderModel) {
   const { login } = props.sender;

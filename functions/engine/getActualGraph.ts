@@ -1,4 +1,4 @@
-import type { ActualGraph } from "../types.ts";
+import type { ActualGraph } from "./types.ts";
 
 const pull_request_graph_query = `
 query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
