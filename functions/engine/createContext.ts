@@ -65,7 +65,7 @@ export default function (payload: any): WebhookContext | null {
       name: repository.name,
       url: repository.html_url,
     },
-    pullRequestNumber: pull_request.number,
+    number: pull_request.number,
     baseRef: pull_request.base.ref,
     requestedReviewer,
     review,

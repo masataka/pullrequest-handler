@@ -40,7 +40,7 @@ export type PullRequest<C extends Partial<Commit>> = {
   mergeCommit: C | null;
   mergeable: string; // 'CONFLICTING' | 'MERGEABLE' | 'UNKNOWN';
   merged: boolean;
-  pullRequestNumber: number;
+  number: number;
   reviewRequests: Connection<ReviewRequest>;
   reviews: Connection<Review>;
   state: string; // 'CLOSED' | 'MERGED' | 'OPEN';
@@ -66,7 +66,7 @@ export type WebhookContext = {
     name: string;
     url: string;
   };
-  pullRequestNumber: number;
+  number: number;
   baseRef: string;
   requestedReviewer?: GitHubUser;
   review?: Review;

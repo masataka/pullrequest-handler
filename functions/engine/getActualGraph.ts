@@ -1,14 +1,14 @@
 import type { ActualGraph } from "./types.ts";
 
 const pull_request_graph_query = `
-query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
+query ($owner: String!, $name: String!, $number: Int!) {
     repository(owner: $owner, name: $name) {
         name
         owner {
             login
             url
         }
-        pullRequest(number: $pullRequestNumber) {
+        pullRequest(number: $number) {
             author {
                 login
                 url
@@ -68,7 +68,7 @@ query ($owner: String!, $name: String!, $pullRequestNumber: Int!) {
             }
             mergeable
             merged
-            pullRequestNumber: number
+            number
             reviewRequests(last: 100) {
                 totalCount
                 edges {
@@ -115,7 +115,7 @@ export default async function (
   githubToken: string,
   owner: string,
   name: string,
-  pullRequestNumber: number,
+  number: number,
 ): Promise<ActualGraph> {
   const response = await fetch("https://api.github.com/graphql", {
     method: "POST",
@@ -124,7 +124,7 @@ export default async function (
       variables: {
         owner,
         name,
-        pullRequestNumber,
+        number,
       },
     }),
     headers: {
