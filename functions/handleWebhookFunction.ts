@@ -1,6 +1,6 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import createContext from "./engine/createContext.ts";
-import postNotification from "./engine/notifiers.ts";
+import postNotification from "./engine/postNotification.ts";
 
 export const handleWebhookFunction = DefineFunction({
   callback_id: "handleWebhook",
