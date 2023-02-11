@@ -12,24 +12,18 @@ export const handleWebhookFunction = DefineFunction({
     },
     required: ["payload"],
   },
-  output_parameters: {
-    properties: {
-      result: { type: Schema.types.object },
-    },
-    required: [],
-  },
 });
 
 export default SlackFunction(
   handleWebhookFunction,
   async ({ inputs, client, env, token }) => {
-    // payload -> context
-    const webhookContext = createContext(inputs.payload);
-    if (webhookContext === null) {
-      return { outputs: {} };
-    }
-
     try {
+      // payload -> context
+      const webhookContext = createContext(inputs.payload);
+      if (webhookContext === null) {
+        return { outputs: {} };
+      }
+
       // settings
       const r1 = await client.apps.datastore.get({
         datastore: "repositoryMap",
@@ -64,11 +58,11 @@ export default SlackFunction(
       console.log({ userMap });
 
       await postNotification(
-        webhookContext,
-        userMap,
         githubToken,
         token,
         slackChannel,
+        userMap,
+        webhookContext,
       );
     } catch (e) {
       return { error: `${e}` };

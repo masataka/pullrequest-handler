@@ -1,11 +1,11 @@
 /** @jsxImportSource npm:jsx-slack@5 */
 import {
-  JSXSlack,
   Blocks,
   Context,
   Divider,
   Fragment,
   Header,
+  JSXSlack,
   Section,
 } from "npm:jsx-slack@5";
 import type {
@@ -148,9 +148,7 @@ function Contents(props: RenderModel) {
     <Fragment>
       <Header>{props.repository.pullRequest.title}</Header>
       <Section>
-        <b>
-          <a href={url}>#{number}</a>
-        </b>
+        <b><a href={url}>#{number}</a></b>
       </Section>
       {text ? <Description text={text} /> : (
         <Section>
@@ -262,29 +260,12 @@ export function renderNotification(props: RenderModel) {
       <Conflicts {...props} />
       <Repository {...props} />
       <Divider />
-    </Blocks>
+    </Blocks>,
   );
 }
 
-function EditedLog(props: RenderModel) {
-  const { login } = props.sender;
-  const slack = props.userMap[login];
-  return (
-    <Blocks>
-      <Context>
-        <b>
-          <UserLink login={login} slack={slack} /> edited this body text
-        </b>
-      </Context>
-    </Blocks>
-  );
-}
-
- function ClosedLog(props: RenderModel) {
+function ClosedLog(props: RenderModel) {
   const { merged } = props.repository.pullRequest;
-  if (!merged) {
-    return null;
-  }
   return (
     <Blocks>
       <Context>
@@ -297,7 +278,19 @@ function EditedLog(props: RenderModel) {
   );
 }
 
- function ReviewRequestedLog(props: RenderModel) {
+function ReopenedLog(props: RenderModel) {
+  return (
+    <Blocks>
+      <Context>
+        <b>
+          This pull request has been reopened.
+        </b>
+      </Context>
+    </Blocks>
+  );
+}
+
+function ReviewRequestedLog(props: RenderModel) {
   const { login } = props.requestedReviewer!;
   const slack = props.userMap[login];
   const msg = props.action === "review_requested" ? "Awaiting" : "Removed";
@@ -312,7 +305,7 @@ function EditedLog(props: RenderModel) {
   );
 }
 
- function SubmittedLog(props: RenderModel) {
+function SubmittedLog(props: RenderModel) {
   const { state, author: { login }, body } = props.review!;
   const slack = props.userMap[login];
   if (state === "APPROVED") {
@@ -349,13 +342,11 @@ function EditedLog(props: RenderModel) {
 }
 
 export function renderActionLog(props: RenderModel) {
-  switch(props.action) {
-    case "edited":
-      return JSXSlack(EditedLog(props));
-    case "closed": {
-      const blocks = ClosedLog(props);
-      return blocks ? JSXSlack(blocks) : null;
-    }
+  switch (props.action) {
+    case "closed":
+      return JSXSlack(ClosedLog(props));
+    case "reopened":
+      return JSXSlack(ReopenedLog(props));
     case "review_requested":
     case "review_request_removed":
       return JSXSlack(ReviewRequestedLog(props));

@@ -1,60 +1,63 @@
-# Pull-Request Handler
+# PullRequest Handler
 
 ## Requirements
 
-Notify the pull request reviewer that a review request is coming,
-Notify the pull request author as soon as the reviewer completes the approval.
+Notify the pull request reviewer that a review request is coming, Notify the
+pull request author as soon as the reviewer completes the approval.
 
-- Post a message to Slack when a particular user is added as a reviewer to a pull request
+- Post a message to Slack when a particular user is added as a reviewer to a
+  pull request
 - Update messages already posted at the following events
-    - Yet another specific user is added as a reviewer
-    - Reviewer completes review
-    - Pull requests are merged
+  - Yet another specific user is added as a reviewer
+  - Reviewer completes review
+  - Pull requests are merged
 - The update history is threaded to the message
 - Mention the Slack account of the target GitHub user
 
 ## handle event of GitHub Actions
 
 - Event > Activity Type
-    - **pull_request**
-        - opened
-            - Even if a review request is made at the same time as the PR opens, the events will occur separately.
-        - **closed**
-            - When a pull request merges, the `pull_request` is automatically `closed`.
-            - with a conditional that checks the `merged` value of the event. also `merged_by`.
-        - **edited**
-        - reopened
-            - I don't know...
-        - **review_requested**
-            - see `payload.requested_reviewer`.
-        - **review_request_removed**
-            - see `payload.requested_reviewer`.
-    - **pull_request_review**
-        - **submitted**
-            - when a pull request has been approved
-            - check the `payload.review.state`, state == `approved` then PR was approved.
-        - dismissed
-            - Change the state of the review, but not the state of the PR.
+  - **pull_request**
+    - opened
+      - Even if a review request is made at the same time as the PR opens, the
+        events will occur separately.
+    - **closed**
+      - When a pull request merges, the `pull_request` is automatically
+        `closed`.
+      - with a conditional that checks the `merged` value of the event. also
+        `merged_by`.
+    - edited
+    - **reopened**
+    - **review_requested**
+      - see `payload.requested_reviewer`.
+    - **review_request_removed**
+      - see `payload.requested_reviewer`.
+  - **pull_request_review**
+    - **submitted**
+      - when a pull request has been approved
+      - check the `payload.review.state`, state == `approved` then PR was
+        approved.
+    - dismissed
+      - Change the state of the review, but not the state of the PR.
 
 ## Call Slack API
 
 - **chat.postMessage**
-    - scope
-        - `chat:write`
+  - scope
+    - `chat:write`
 - **chat.update**
-    - scope
-        - `chat:write`
+  - scope
+    - `chat:write`
 - **conversations.history**
-    - scope
-        - `channels:history`
-        - `groups:history`
-        - `im:history`
-        - `mpim:history`
+  - scope
+    - `channels:history`
+    - `groups:history`
+    - `im:history`
+    - `mpim:history`
 - datastore
-    - scope
-        - `datastore:read`
-        - `datastore:write`
- 
+  - scope
+    - `datastore:read`
+    - `datastore:write`
 
 ## Create a Link Trigger
 

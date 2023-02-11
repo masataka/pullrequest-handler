@@ -19,15 +19,17 @@ type SlackMessage = {
 };
 
 async function findPreviousMessage(
-  slackToken: string,
-  slackChannel: string,
-  owner: string,
-  name: string,
-  number: number,
+  args: {
+    slackToken: string;
+    slackChannel: string;
+    owner: string;
+    name: string;
+    number: number;
+  },
 ): Promise<string | null> {
-  const client = SlackAPI(slackToken);
+  const client = SlackAPI(args.slackToken);
   const result = await client.conversations.history({
-    channel: slackChannel,
+    channel: args.slackChannel,
     include_all_metadata: true,
     limit: 100,
   });
@@ -39,8 +41,8 @@ async function findPreviousMessage(
         if (withMetadata.metadata.event_type === EVENT_TYPE) {
           const actual = withMetadata.metadata.event_payload;
           if (
-            actual.owner === owner && actual.name === name &&
-            actual.number === number
+            actual.owner === args.owner && actual.name === args.name &&
+            actual.number === args.number
           ) {
             return withMetadata.ts;
           }
@@ -52,98 +54,89 @@ async function findPreviousMessage(
 }
 
 async function upsertMessage(
-  slackToken: string,
-  slackChannel: string,
-  owner: string,
-  name: string,
-  number: number,
-  // deno-lint-ignore no-explicit-any
-  blocks: any,
-  root: boolean,
-  ts: string | null,
+  args: {
+    slackToken: string;
+    slackChannel: string;
+    owner: string;
+    name: string;
+    number: number;
+    notification: boolean;
+    // deno-lint-ignore no-explicit-any
+    blocks: any;
+    ts: string | null;
+  },
 ) {
   const payload = {
-    channel: slackChannel,
-    blocks,
+    channel: args.slackChannel,
+    blocks: args.blocks,
     text: EVENT_TYPE,
   };
   const metadata = {
     metadata: {
       event_type: EVENT_TYPE,
       event_payload: {
-        owner,
-        name,
-        number,
+        owner: args.owner,
+        name: args.name,
+        number: args.number,
       },
     },
   };
   console.log({ payload, metadata });
 
-  const client = SlackAPI(slackToken);
-  if (ts) {
-    if (root) {
-      return await client.chat.update({ ...payload, ...metadata, ts });
+  const client = SlackAPI(args.slackToken);
+  if (args.ts) {
+    if (args.notification) {
+      return await client.chat.update({ ...payload, ...metadata, ts: args.ts });
     }
-    return await client.chat.postMessage({ ...payload, thread_ts: ts });
+    return await client.chat.postMessage({ ...payload, thread_ts: args.ts });
   }
   return await client.chat.postMessage({ ...payload, ...metadata });
 }
 
 export default async function (
-  webhookContext: WebhookContext,
-  userMap: KeyValueStore<string>,
   githubToken: string,
   slackToken: string,
   slackChannel: string,
+  userMap: KeyValueStore<string>,
+  webhookContext: WebhookContext,
 ) {
-  const owner = webhookContext.repository.owner.login;
-  const name = webhookContext.repository.name;
-  const number = webhookContext.number;
+  const args = {
+    githubToken,
+    slackToken,
+    slackChannel,
+    owner: webhookContext.repository.owner.login,
+    name: webhookContext.repository.name,
+    number: webhookContext.number,
+  };
 
-  //ActualGraph
-  const actualGraph = await getActualGraph(githubToken, owner, name, number);
+  // ActualGraph
+  const actualGraph = await getActualGraph(args);
   console.log(actualGraph);
 
-  // MessageTS
-  let ts = await findPreviousMessage(
-    slackToken,
-    slackChannel,
-    owner,
-    name,
-    number,
-  );
-  console.log({ ts });
+  // PreviousTS
+  const previousTS = await findPreviousMessage(args);
+  console.log({ previousTS });
 
-  //MessageBlocks
   const renderModel = { ...webhookContext, userMap, ...actualGraph };
-  const notification = renderNotification(renderModel);
 
-  const result = await upsertMessage(
-    slackToken,
-    slackChannel,
-    owner,
-    name,
-    number,
-    notification,
-    true,
-    ts,
-  );
+  // Notification
+  const result = await upsertMessage({
+    ...args,
+    notification: true,
+    blocks: renderNotification(renderModel),
+    ts: previousTS,
+  });
+
+  // ActionLog
   if (result.ok) {
-    ts = result.ts;
-    if (ts) {
-      const actionLog = renderActionLog(renderModel);
-      if (actionLog) {
-        await upsertMessage(
-          slackToken,
-          slackChannel,
-          owner,
-          name,
-          number,
-          actionLog,
-          false,
-          ts,
-        );
-      }
+    const actionLog = renderActionLog(renderModel);
+    if (actionLog) {
+      await upsertMessage({
+        ...args,
+        notification: false,
+        blocks: actionLog,
+        ts: result.ts,
+      });
     }
   }
 }

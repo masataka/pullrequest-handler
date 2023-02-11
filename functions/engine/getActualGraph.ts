@@ -112,23 +112,21 @@ query ($owner: String!, $name: String!, $number: Int!) {
 `;
 
 export default async function (
-  githubToken: string,
-  owner: string,
-  name: string,
-  number: number,
+  args: {
+    githubToken: string;
+    owner: string;
+    name: string;
+    number: number;
+  },
 ): Promise<ActualGraph> {
   const response = await fetch("https://api.github.com/graphql", {
     method: "POST",
     body: JSON.stringify({
       query: pull_request_graph_query,
-      variables: {
-        owner,
-        name,
-        number,
-      },
+      variables: args,
     }),
     headers: {
-      Authorization: `Bearer ${githubToken}`,
+      Authorization: `Bearer ${args.githubToken}`,
       "content-type": "application/json",
     },
   });
