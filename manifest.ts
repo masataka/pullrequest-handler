@@ -16,6 +16,7 @@ export default Manifest({
   ],
   outgoingDomains: [
     "api.github.com",
+    "esm.sh",
   ],
   datastores: [
     repositoryMapDatastore,
