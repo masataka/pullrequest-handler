@@ -45,7 +45,11 @@ function StatusSection(props: { test: boolean; text: string }) {
 }
 
 function Reviewers(
-  props: { userMap: KeyValueStore<string>; reviewers: string[]; text: string },
+  props: {
+    userAccountMap: KeyValueStore<string>;
+    reviewers: string[];
+    text: string;
+  },
 ) {
   const count = props.reviewers.length;
   if (count == 0) {
@@ -57,7 +61,7 @@ function Reviewers(
       {props.reviewers.map((login) => {
         return (
           <span>
-            <UserLink login={login} slack={props.userMap[login]} />
+            <UserLink login={login} slack={props.userAccountMap[login]} />
           </span>
         );
       })}
@@ -132,7 +136,8 @@ function Commits(props: RenderModel) {
   return (
     <Context>
       <span>
-        [<b>{state}</b>] <UserLink login={login} slack={props.userMap[login]} />
+        [<b>{state}</b>]{" "}
+        <UserLink login={login} slack={props.userAccountMap[login]} />
         {` ${text} ${totalCount} ${commitUnit} (${changedFiles} file ${changeUnit}) into `}
         <BranchLink url={url} ref={base} /> from{" "}
         <BranchLink url={url} ref={head} static={merged} />
@@ -197,17 +202,17 @@ function Approvals(props: RenderModel) {
     <Fragment>
       <StatusSection test={everybodyApproved} text={text} />
       <Reviewers
-        userMap={props.userMap}
+        userAccountMap={props.userAccountMap}
         reviewers={approvals}
         text={`approval${unit(approvals)}`}
       />
       <Reviewers
-        userMap={props.userMap}
+        userAccountMap={props.userAccountMap}
         reviewers={changeRequesteds}
         text={`reviewer${unit(approvals)} requested changes`}
       />
       <Reviewers
-        userMap={props.userMap}
+        userAccountMap={props.userAccountMap}
         reviewers={pendings}
         text={`pending reviewer${unit(approvals)}`}
       />
@@ -294,7 +299,7 @@ function ReopenedLog(props: RenderModel) {
 
 function ReviewRequestedLog(props: RenderModel) {
   const { login } = props.requestedReviewer!;
-  const slack = props.userMap[login];
+  const slack = props.userAccountMap[login];
   const msg = props.action === "review_requested" ? "Awaiting" : "Removed";
   return (
     <Blocks>
@@ -309,10 +314,10 @@ function ReviewRequestedLog(props: RenderModel) {
 
 function SubmittedLog(props: RenderModel) {
   const { state, author: { login }, body } = props.review!;
-  const slack = props.userMap[login];
+  const slack = props.userAccountMap[login];
   if (state === "APPROVED") {
     const authorLogin = props.repository.pullRequest.author.login;
-    const authorSlack = props.userMap[authorLogin];
+    const authorSlack = props.userAccountMap[authorLogin];
     return (
       <Blocks>
         <Context>

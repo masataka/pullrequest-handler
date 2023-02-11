@@ -1,7 +1,7 @@
 import { DefineDatastore, Schema } from "deno-slack-sdk/mod.ts";
 
-export const userMapDatastore = DefineDatastore({
-  name: "userMap",
+export const userAccountMapDatastore = DefineDatastore({
+  name: "userAccountMap",
   primary_key: "githubAccount",
   attributes: {
     githubAccount: { type: Schema.types.string },

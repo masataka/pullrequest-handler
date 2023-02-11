@@ -1,9 +1,9 @@
 import { DefineWorkflow, Schema } from "deno-slack-sdk/mod.ts";
-import { handleWebhookFunction } from "../functions/handleWebhookFunction.ts";
+import { notifyPullRequestFunction } from "../functions/notifyPullRequestFunction.ts";
 
 export const notifyPullRequestWorkflow = DefineWorkflow({
   callback_id: "notifyPullRequestWorkflow",
-  title: "Notify PullRequest",
+  title: "Notify PullRequest Workflow",
   input_parameters: {
     properties: {
       payload: { type: Schema.types.object },
@@ -12,6 +12,6 @@ export const notifyPullRequestWorkflow = DefineWorkflow({
   },
 });
 
-notifyPullRequestWorkflow.addStep(handleWebhookFunction, {
+notifyPullRequestWorkflow.addStep(notifyPullRequestFunction, {
   payload: notifyPullRequestWorkflow.inputs.payload,
 });

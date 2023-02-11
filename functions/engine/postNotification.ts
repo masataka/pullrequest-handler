@@ -97,7 +97,7 @@ export default async function (
   githubToken: string,
   slackToken: string,
   slackChannel: string,
-  userMap: KeyValueStore<string>,
+  userAccountMap: KeyValueStore<string>,
   webhookContext: WebhookContext,
 ) {
   const args = {
@@ -117,7 +117,7 @@ export default async function (
   const previousTS = await findPreviousMessage(args);
   console.log({ previousTS });
 
-  const renderModel = { ...webhookContext, userMap, ...actualGraph };
+  const renderModel = { ...webhookContext, userAccountMap, ...actualGraph };
 
   // Notification
   const result = await upsertMessage({

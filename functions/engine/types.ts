@@ -80,5 +80,5 @@ export type RenderModel =
   & Omit<WebhookContext, "repository">
   & ActualGraph
   & {
-    userMap: KeyValueStore<string>;
+    userAccountMap: KeyValueStore<string>;
   };

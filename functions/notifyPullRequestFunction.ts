@@ -2,10 +2,10 @@ import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import createContext from "./engine/createContext.ts";
 import postNotification from "./engine/postNotification.ts";
 
-export const handleWebhookFunction = DefineFunction({
-  callback_id: "handleWebhook",
-  title: "Handle Webhook",
-  source_file: "functions/handleWebhookFunction.ts",
+export const notifyPullRequestFunction = DefineFunction({
+  callback_id: "notifyPullRequestFunction",
+  title: "Notify PullRequest Function",
+  source_file: "functions/notifyPullRequestFunction.ts",
   input_parameters: {
     properties: {
       payload: { type: Schema.types.object },
@@ -15,7 +15,7 @@ export const handleWebhookFunction = DefineFunction({
 });
 
 export default SlackFunction(
-  handleWebhookFunction,
+  notifyPullRequestFunction,
   async ({ inputs, client, env, token }) => {
     try {
       // payload -> context
@@ -44,24 +44,24 @@ export default SlackFunction(
       }
 
       const r2 = await client.apps.datastore.query({
-        datastore: "userMap",
+        datastore: "userAccountMap",
       });
-      let userMap = {};
+      let userAccountMap = {};
       if (r2.ok) {
-        userMap = r2.items.reduce((previous, value) => {
+        userAccountMap = r2.items.reduce((previous, value) => {
           return {
             ...previous,
             [value["githubAccount"]]: value["slackAccount"],
           };
         }, {});
       }
-      console.log({ userMap });
+      console.log({ userAccountMap });
 
       await postNotification(
         githubToken,
         token,
         slackChannel,
-        userMap,
+        userAccountMap,
         webhookContext,
       );
     } catch (e) {
