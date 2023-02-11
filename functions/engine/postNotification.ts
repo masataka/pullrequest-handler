@@ -4,7 +4,7 @@ import getActualGraph from "./getActualGraph.ts";
 import { renderActionLog, renderNotification } from "./renderers.tsx";
 import type { KeyValueStore, WebhookContext } from "./types.ts";
 
-const EVENT_TYPE = "pull-request-notify";
+const EVENT_TYPE = "PullRequest-Handler";
 
 type SlackMessage = {
   metadata: {
