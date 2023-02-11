@@ -72,25 +72,22 @@ async function upsertMessage(
     text: EVENT_TYPE,
   };
   const metadata = {
-    metadata: {
-      event_type: EVENT_TYPE,
-      event_payload: {
-        owner: args.owner,
-        name: args.name,
-        number: args.number,
-      },
+    event_type: EVENT_TYPE,
+    event_payload: {
+      owner: args.owner,
+      name: args.name,
+      number: args.number,
     },
   };
-  console.log({ payload, metadata });
 
   const client = SlackAPI(args.slackToken);
   if (args.ts) {
     if (args.notification) {
-      return await client.chat.update({ ...payload, ...metadata, ts: args.ts });
+      return await client.chat.update({ ...payload, metadata, ts: args.ts });
     }
     return await client.chat.postMessage({ ...payload, thread_ts: args.ts });
   }
-  return await client.chat.postMessage({ ...payload, ...metadata });
+  return await client.chat.postMessage({ ...payload, metadata });
 }
 
 export default async function (
