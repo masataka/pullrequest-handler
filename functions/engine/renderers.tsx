@@ -148,7 +148,9 @@ function Contents(props: RenderModel) {
     <Fragment>
       <Header>{props.repository.pullRequest.title}</Header>
       <Section>
-        <b><a href={url}>#{number}</a></b>
+        <b>
+          <a href={url}>#{number}</a>
+        </b>
       </Section>
       {text ? <Description text={text} /> : (
         <Section>
