@@ -1,7 +1,5 @@
 # PullRequest Handler
 
-## Requirements
-
 Notify the pull request reviewer that a review request is coming, Notify the
 pull request author as soon as the reviewer completes the approval.
 
@@ -14,41 +12,41 @@ pull request author as soon as the reviewer completes the approval.
 - The update history is threaded to the message
 - Mention the Slack account of the target GitHub user
 
-## handle event of GitHub Actions
+#### handle event of GitHub Actions
 
 - Event > Activity Type
-  - **pull_request**
+  - pull_request
     - opened
       - Even if a review request is made at the same time as the PR opens, the
         events will occur separately.
-    - **closed**
+    - closed
       - When a pull request merges, the `pull_request` is automatically
         `closed`.
       - with a conditional that checks the `merged` value of the event. also
         `merged_by`.
     - edited
-    - **reopened**
-    - **review_requested**
+    - reopened
+    - review_requested
       - see `payload.requested_reviewer`.
-    - **review_request_removed**
+    - review_request_removed
       - see `payload.requested_reviewer`.
-  - **pull_request_review**
-    - **submitted**
+  - pull_request_review
+    - submitted
       - when a pull request has been approved
       - check the `payload.review.state`, state == `approved` then PR was
         approved.
     - dismissed
       - Change the state of the review, but not the state of the PR.
 
-## Call Slack API
+#### Call Slack API
 
-- **chat.postMessage**
+- chat.postMessage
   - scope
     - `chat:write`
-- **chat.update**
+- chat.update
   - scope
     - `chat:write`
-- **conversations.history**
+- conversations.history
   - scope
     - `channels:history`
     - `groups:history`
@@ -59,61 +57,61 @@ pull request author as soon as the reviewer completes the approval.
     - `datastore:read`
     - `datastore:write`
 
-## Create a Link Trigger
+## 1.Deploying PullRequest Handler to your Slack
+
+You can deploy the production version of PullRequest Handler to Slack hosting using `slack deploy`:
+
+```zsh
+% slack deploy
+```
+
+After deploying, create new Webhook Trigger and new Link Triggers for this app. 
+Once the Triggers are invoked, the associated Workflows should run.
+
+## 2.Create Triggers
 
 To create a Link Trigger, run the following command:
 
 ```zsh
-$ slack trigger create --trigger-def triggers/pullRequestEventTrigger.ts
+# Webhook Trigger
+% slack trigger create --trigger-def triggers/notifyPullRequestTrigger.ts
+```
+
+After selecting a Workspace, the output provided will include the Webhook Trigger
+Payload URL. Copy and paste this URL into a GitHub repository setting/Webhooks.
+
+```zsh
+# Link Trigger
+% slack trigger create --trigger-def triggers/addRepositoryMappingTrigger.ts
+% slack trigger create --trigger-def triggers/addUserAccountMappingTrigger.ts
 ```
 
 After selecting a Workspace, the output provided will include the Link Trigger
 Shortcut URL. Copy and paste this URL into a channel as a message, or add it as
 a bookmark in a channel of the Workspace you selected.
 
-## Running Your Project Locally
+## 3.Add GihHub token
 
-The .env file is needed when running tests locally.
-
-```yml
-githubToken=ghp_abcdefghijklmnopqrstuvwxyz0123456789
-```
-
-While building your app, you can see your changes propagated to your workspace
-in real-time with `slack run`. In both the CLI and in Slack, you'll know an app
-is the development version if the name has the string `(dev)` appended.
+Register GitHub API Token.
 
 ```zsh
-# Run app locally
-$ slack run
-
-Connected, awaiting events
+% slack env add githubToken <token>
 ```
+## 4.Register target repositories to Slack Datastore
 
-Once running, [previously created Shortcut URLs](#create-a-link-trigger)
-associated with the `(dev)` version of your app can be used to start Workflows.
+Run the addRepositoryMappingTrigger in your slack workspace. target repository's URL
+and target branch name, Slack channel are needed.
 
-To stop running locally, press `<CTRL> + C` to end the process.
+for example...
+- repositoryURL: https://github.com/masataka/pullrequest-handler
+- branch: develop
+- slackChannel: #ntf-pullrequest
 
-## Deploying Your App
+## 5.Register account mappings to Slack Datastore
 
-Once you're done with development, you can deploy the production version of your
-app to Slack hosting using `slack deploy`:
+Run the addUserAccountMappingTrigger in your slack workspace. 
+you can register GitHub account and Slack account pairs.
 
-```zsh
-$ slack deploy
-```
+## 6.Add PullRequest Handler to slack channel
 
-After deploying, [create new Link Triggers](#create-a-link-trigger) for the
-production version of your app (not appended with `(dev)`). Once the Triggers
-are invoked, the associated Workflows should run just as they did when
-developing locally.
-
-### Viewing Activity Logs
-
-Activity logs for the production instance of your application can be viewed with
-the `slack activity` command:
-
-```zsh
-$ slack activity
-```
+Add this app to Slack channel. setting -> integration -> app.
