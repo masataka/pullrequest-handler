@@ -111,11 +111,9 @@ export default async function (
 
   // ActualGraph
   const actualGraph = await getActualGraph(args);
-  console.log(actualGraph);
 
   // PreviousTS
   const previousTS = await findPreviousMessage(args);
-  console.log({ previousTS });
 
   const renderModel = { ...webhookContext, userAccountMap, ...actualGraph };
 
@@ -126,17 +124,19 @@ export default async function (
     blocks: renderNotification(renderModel),
     ts: previousTS,
   });
+  if (!result.ok) {
+    console.log({ result });
+    return;
+  }
 
   // ActionLog
-  if (result.ok) {
-    const actionLog = renderActionLog(renderModel);
-    if (actionLog) {
-      await upsertMessage({
-        ...args,
-        notification: false,
-        blocks: actionLog,
-        ts: result.ts,
-      });
-    }
+  const actionLog = renderActionLog(renderModel);
+  if (actionLog) {
+    await upsertMessage({
+      ...args,
+      notification: false,
+      blocks: actionLog,
+      ts: result.ts,
+    });
   }
 }

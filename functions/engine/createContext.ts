@@ -6,8 +6,6 @@ import type { GitHubUser, Review, WebhookContext } from "./types.ts";
 
 // deno-lint-ignore no-explicit-any
 export default function (payload: any): WebhookContext | null {
-  console.log({ payload });
-
   const pullRequestEvent = payload as PullRequestEvent;
   const { sender, action, repository, pull_request } = pullRequestEvent;
 
