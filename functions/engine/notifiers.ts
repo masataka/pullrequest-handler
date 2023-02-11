@@ -1,9 +1,10 @@
 import { SlackAPI } from "deno-slack-api/mod.ts";
-import { JSXSlack } from "npm:jsx-slack@5";
 
 import getActualGraph from "./getActualGraph.ts";
-import { PullRequest } from "./messageRenderer.tsx";
+import { renderActionLog, renderNotification } from "./renderers.tsx";
 import type { KeyValueStore, WebhookContext } from "./types.ts";
+
+const EVENT_TYPE = "pull-request-notify";
 
 type SlackMessage = {
   metadata: {
@@ -50,7 +51,43 @@ async function findPreviousMessage(
   return null;
 }
 
-const EVENT_TYPE = "pull-request-notify";
+async function upsertMessage(
+  slackToken: string,
+  slackChannel: string,
+  owner: string,
+  name: string,
+  number: number,
+  // deno-lint-ignore no-explicit-any
+  blocks: any,
+  root: boolean,
+  ts: string | null,
+) {
+  const payload = {
+    channel: slackChannel,
+    blocks,
+    text: EVENT_TYPE,
+  };
+  const metadata = {
+    metadata: {
+      event_type: EVENT_TYPE,
+      event_payload: {
+        owner,
+        name,
+        number,
+      },
+    },
+  };
+  console.log({ payload, metadata });
+
+  const client = SlackAPI(slackToken);
+  if (ts) {
+    if (root) {
+      return await client.chat.update({ ...payload, ...metadata, ts });
+    }
+    return await client.chat.postMessage({ ...payload, thread_ts: ts });
+  }
+  return await client.chat.postMessage({ ...payload, ...metadata });
+}
 
 export default async function (
   webhookContext: WebhookContext,
@@ -62,19 +99,13 @@ export default async function (
   const owner = webhookContext.repository.owner.login;
   const name = webhookContext.repository.name;
   const number = webhookContext.number;
+
   //ActualGraph
   const actualGraph = await getActualGraph(githubToken, owner, name, number);
   console.log(actualGraph);
 
-  //renderMessageBlock
-  const blocks = JSXSlack(
-    PullRequest({ ...webhookContext, userMap, ...actualGraph }),
-  );
-
-  // postMessageBlockWithMetadata
-  const client = SlackAPI(slackToken);
-
-  const ts = await findPreviousMessage(
+  // MessageTS
+  let ts = await findPreviousMessage(
     slackToken,
     slackChannel,
     owner,
@@ -83,32 +114,36 @@ export default async function (
   );
   console.log({ ts });
 
-  const payload = {
-    channel: slackChannel,
-    blocks,
-    text: EVENT_TYPE,
-    metadata: {
-      event_type: EVENT_TYPE,
-      event_payload: {
-        owner,
-        name,
-        number,
-      },
-    },
-  };
-  console.log({ payload });
+  //MessageBlocks
+  const renderModel = { ...webhookContext, userMap, ...actualGraph };
+  const notification = renderNotification(renderModel);
 
-  let result;
-  if (ts === null) {
-    result = await client.chat.postMessage(payload);
-  } else {
-    result = await client.chat.update({ ...payload, ts });
+  const result = await upsertMessage(
+    slackToken,
+    slackChannel,
+    owner,
+    name,
+    number,
+    notification,
+    true,
+    ts,
+  );
+  if (result.ok) {
+    ts = result.ts;
+    if (ts) {
+      const actionLog = renderActionLog(renderModel);
+      if (actionLog) {
+        await upsertMessage(
+          slackToken,
+          slackChannel,
+          owner,
+          name,
+          number,
+          actionLog,
+          false,
+          ts,
+        );
+      }
+    }
   }
-  console.log({ result });
-
-  return {
-    ok: !!result.ok,
-    error: result.error || "",
-    ts: result.ts || "",
-  };
 }

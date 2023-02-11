@@ -1,6 +1,6 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import createContext from "./engine/createContext.ts";
-import postNotification from "./engine/postNotification.ts";
+import postNotification from "./engine/notifiers.ts";
 
 export const handleWebhookFunction = DefineFunction({
   callback_id: "handleWebhook",
@@ -41,8 +41,6 @@ export default SlackFunction(
         branch = r1.item["branch"];
         slackChannel = r1.item["slackChannel"];
       }
-
-      // リポジトリがヒットしなかったとき、処理を中断する。
 
       const githubToken = env["githubToken"];
       console.log({ branch, slackChannel, githubToken });

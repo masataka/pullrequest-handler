@@ -1,5 +1,6 @@
 /** @jsxImportSource npm:jsx-slack@5 */
 import {
+  JSXSlack,
   Blocks,
   Context,
   Divider,
@@ -15,7 +16,7 @@ import type {
   ReviewRequest,
 } from "./types.ts";
 
-export function Description(props: { text: string | null }) {
+function Description(props: { text: string | null }) {
   return (props.text
     ? (
       <Section>
@@ -25,7 +26,7 @@ export function Description(props: { text: string | null }) {
     : null);
 }
 
-export function UserLink(props: { login: string; slack?: string }) {
+function UserLink(props: { login: string; slack?: string }) {
   return (props.slack ? <a href={`@${props.slack}`} /> : <i>{props.login}</i>);
 }
 
@@ -70,7 +71,7 @@ type ArrangeResult = {
   pendings: string[];
 };
 
-export function arrangeReviewers(
+function arrangeReviewers(
   req: Connection<ReviewRequest>,
   rv: Connection<Review>,
 ): ArrangeResult {
@@ -112,7 +113,7 @@ export function arrangeReviewers(
   );
 }
 
-export function Commits(props: RenderModel) {
+function Commits(props: RenderModel) {
   const {
     url,
     pullRequest: {
@@ -140,7 +141,7 @@ export function Commits(props: RenderModel) {
   );
 }
 
-export function Contents(props: RenderModel) {
+function Contents(props: RenderModel) {
   const { url, number, body } = props.repository.pullRequest;
   const text = body && body.trim();
   return (
@@ -238,7 +239,7 @@ function Conflicts(props: RenderModel) {
   );
 }
 
-export function Repository(props: RenderModel) {
+function Repository(props: RenderModel) {
   const { name, url, owner, pullRequest } = props.repository;
   const githubcom = <a href="https://github.com/">https://github.com</a>;
   const org = <a href={owner.url}>{owner.login}</a>;
@@ -252,8 +253,8 @@ export function Repository(props: RenderModel) {
   );
 }
 
-export function PullRequest(props: RenderModel) {
-  return (
+export function renderNotification(props: RenderModel) {
+  return JSXSlack(
     <Blocks>
       <Commits {...props} />
       <Contents {...props} />
@@ -263,4 +264,106 @@ export function PullRequest(props: RenderModel) {
       <Divider />
     </Blocks>
   );
+}
+
+function EditedLog(props: RenderModel) {
+  const { login } = props.sender;
+  const slack = props.userMap[login];
+  return (
+    <Blocks>
+      <Context>
+        <b>
+          <UserLink login={login} slack={slack} /> edited this body text
+        </b>
+      </Context>
+    </Blocks>
+  );
+}
+
+ function ClosedLog(props: RenderModel) {
+  const { merged } = props.repository.pullRequest;
+  if (!merged) {
+    return null;
+  }
+  return (
+    <Blocks>
+      <Context>
+        <b>
+          This pull request has been closed{" "}
+          {merged ? "and the merge is complete" : "without merge"}
+        </b>
+      </Context>
+    </Blocks>
+  );
+}
+
+ function ReviewRequestedLog(props: RenderModel) {
+  const { login } = props.requestedReviewer!;
+  const slack = props.userMap[login];
+  const msg = props.action === "review_requested" ? "Awaiting" : "Removed";
+  return (
+    <Blocks>
+      <Context>
+        <b>
+          {msg} requested review from <UserLink login={login} slack={slack} />
+        </b>
+      </Context>
+    </Blocks>
+  );
+}
+
+ function SubmittedLog(props: RenderModel) {
+  const { state, author: { login }, body } = props.review!;
+  const slack = props.userMap[login];
+  if (state === "APPROVED") {
+    const authorLogin = props.repository.pullRequest.author.login;
+    const authorSlack = props.userMap[authorLogin];
+    return (
+      <Blocks>
+        <Context>
+          <b>
+            <UserLink login={login} slack={slack} /> approved{" "}
+            <UserLink
+              login={authorLogin}
+              slack={authorSlack}
+            />'s changes.
+          </b>
+        </Context>
+        <Description text={body} />
+      </Blocks>
+    );
+  }
+  if (body) {
+    return (
+      <Blocks>
+        <Context>
+          <b>
+            <UserLink login={login} slack={slack} /> commented.
+          </b>
+        </Context>
+        <Description text={body} />
+      </Blocks>
+    );
+  }
+  return null;
+}
+
+export function renderActionLog(props: RenderModel) {
+  switch(props.action) {
+    case "edited":
+      return JSXSlack(EditedLog(props));
+    case "closed": {
+      const blocks = ClosedLog(props);
+      return blocks ? JSXSlack(blocks) : null;
+    }
+    case "review_requested":
+    case "review_request_removed":
+      return JSXSlack(ReviewRequestedLog(props));
+    case "submitted": {
+      const blocks = SubmittedLog(props);
+      return blocks ? JSXSlack(blocks) : null;
+    }
+    default:
+      return null;
+  }
 }
