@@ -13,38 +13,7 @@ export const addRepositoryMappingWorkflow = DefineWorkflow({
   },
 });
 
-const inputForm = addRepositoryMappingWorkflow.addStep(
-  Schema.slack.functions.OpenForm,
-  {
-    title: "Add Repository Mapping",
-    interactivity: addRepositoryMappingWorkflow.inputs.interactivity,
-    submit_label: "Save",
-    fields: {
-      elements: [
-        {
-          name: "repositoryURL",
-          title: "Target repository URL of GitHub",
-          type: Schema.types.string,
-        },
-        {
-          name: "branch",
-          title: "Target branch",
-          type: Schema.types.string,
-        },
-        {
-          name: "slackChannel",
-          title: "Channel to send message to",
-          type: Schema.slack.types.channel_id,
-          default: addRepositoryMappingWorkflow.inputs.slackChannel,
-        },
-      ],
-      required: ["repositoryURL", "branch", "slackChannel"],
-    },
-  },
-);
-
 addRepositoryMappingWorkflow.addStep(addRepositoryMappingFunction, {
-  repositoryURL: inputForm.outputs.fields.repositoryURL,
-  branch: inputForm.outputs.fields.branch,
-  slackChannel: inputForm.outputs.fields.slackChannel,
+  interactivity: addRepositoryMappingWorkflow.inputs.interactivity,
+  slackChannel: addRepositoryMappingWorkflow.inputs.slackChannel,
 });

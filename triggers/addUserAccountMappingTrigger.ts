@@ -5,10 +5,14 @@ const addUserAccountMappingTrigger: Trigger<
   typeof addUserAccountMappingWorkflow.definition
 > = {
   type: "shortcut",
-  name: "addUserAccountMappingTrigger",
+  name: "Add User Account Mapping",
   workflow: "#/workflows/addUserAccountMappingWorkflow",
+  shortcut: {
+    button_text: "Add Mapping",
+  },
   inputs: {
     interactivity: { value: "{{data.interactivity}}" },
+    slackAccount: { value: "{{data.user_id}}" },
   },
 };
 

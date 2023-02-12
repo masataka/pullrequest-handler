@@ -5,8 +5,11 @@ const addRepositoryMappingTrigger: Trigger<
   typeof addRepositoryMappingWorkflow.definition
 > = {
   type: "shortcut",
-  name: "addRepositoryMappingTrigger",
+  name: "Add Repository Mapping",
   workflow: "#/workflows/addRepositoryMappingWorkflow",
+  shortcut: {
+    button_text: "Add Mapping",
+  },
   inputs: {
     interactivity: { value: "{{data.interactivity}}" },
     slackChannel: { value: "{{data.channel_id}}" },

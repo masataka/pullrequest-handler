@@ -7,36 +7,13 @@ export const addUserAccountMappingWorkflow = DefineWorkflow({
   input_parameters: {
     properties: {
       interactivity: { type: Schema.slack.types.interactivity },
+      slackAccount: { type: Schema.slack.types.user_id },
     },
     required: ["interactivity"],
   },
 });
 
-const inputForm = addUserAccountMappingWorkflow.addStep(
-  Schema.slack.functions.OpenForm,
-  {
-    title: "User Account Mapping",
-    interactivity: addUserAccountMappingWorkflow.inputs.interactivity,
-    submit_label: "Save",
-    fields: {
-      elements: [
-        {
-          name: "githubAccount",
-          title: "GitHub Account",
-          type: Schema.types.string,
-        },
-        {
-          name: "slackAccount",
-          title: "Slack Account",
-          type: Schema.slack.types.user_id,
-        },
-      ],
-      required: ["githubAccount", "slackAccount"],
-    },
-  },
-);
-
 addUserAccountMappingWorkflow.addStep(addUserAccountMappingFunction, {
-  githubAccount: inputForm.outputs.fields.githubAccount,
-  slackAccount: inputForm.outputs.fields.slackAccount,
+  interactivity: addUserAccountMappingWorkflow.inputs.interactivity,
+  slackAccount: addUserAccountMappingWorkflow.inputs.slackAccount,
 });

@@ -59,13 +59,14 @@ pull request author as soon as the reviewer completes the approval.
 
 ## 1.Deploying PullRequest Handler to your Slack
 
-You can deploy the production version of PullRequest Handler to Slack hosting using `slack deploy`:
+You can deploy the production version of PullRequest Handler to Slack hosting
+using `slack deploy`:
 
 ```zsh
 % slack deploy
 ```
 
-After deploying, create new Webhook Trigger and new Link Triggers for this app. 
+After deploying, create new Webhook Trigger and new Link Triggers for this app.
 Once the Triggers are invoked, the associated Workflows should run.
 
 ## 2.Create Triggers
@@ -77,8 +78,9 @@ To create a Link Trigger, run the following command:
 % slack trigger create --trigger-def triggers/notifyPullRequestTrigger.ts
 ```
 
-After selecting a Workspace, the output provided will include the Webhook Trigger
-Payload URL. Copy and paste this URL into a GitHub repository setting/Webhooks.
+After selecting a Workspace, the output provided will include the Webhook
+Trigger Payload URL. Copy and paste this URL into a GitHub repository
+setting/Webhooks.
 
 ```zsh
 # Link Trigger
@@ -97,20 +99,22 @@ Register GitHub API Token.
 ```zsh
 % slack env add githubToken <token>
 ```
+
 ## 4.Register target repositories to Slack Datastore
 
-Run the addRepositoryMappingTrigger in your slack workspace. target repository's URL
-and target branch name, Slack channel are needed.
+Run the addRepositoryMappingTrigger in your slack workspace. target repository's
+URL and target branch name, Slack channel are needed.
 
 for example...
+
 - repositoryURL: https://github.com/masataka/pullrequest-handler
 - branch: develop
 - slackChannel: #ntf-pullrequest
 
 ## 5.Register account mappings to Slack Datastore
 
-Run the addUserAccountMappingTrigger in your slack workspace. 
-you can register GitHub account and Slack account pairs.
+Run the addUserAccountMappingTrigger in your slack workspace. you can register
+GitHub account and Slack account pairs.
 
 ## 6.Add PullRequest Handler to slack channel
 
