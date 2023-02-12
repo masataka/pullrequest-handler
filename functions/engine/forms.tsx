@@ -33,7 +33,7 @@ export function renderRepositoryMappingForm(
           <Mrkdwn>{value.repositoryURL}/tree/{value.branch}</Mrkdwn>
         </Field>
         <Field>
-          <Mrkdwn>&lt;#{value.slackChannel}&gt;</Mrkdwn>
+          <Mrkdwn raw verbatim>{`<#${value.slackChannel}>`}</Mrkdwn>
         </Field>
         <Button
           style="danger"
@@ -89,7 +89,7 @@ export function renderUserAccountMappingForm(
       <Section>
         <Field>{value.githubAccount}</Field>
         <Field>
-          <Mrkdwn>&lt;@{value.slackAccount}&gt;</Mrkdwn>
+          <Mrkdwn raw verbatim>{`<@${value.slackAccount}>`}</Mrkdwn>
         </Field>
         <Button
           style="danger"
