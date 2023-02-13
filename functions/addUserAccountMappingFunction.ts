@@ -20,16 +20,16 @@ export const addUserAccountMappingFunction = DefineFunction({
 function createViewContext(
   // deno-lint-ignore no-explicit-any
   interactivity_pointer: any,
+  view_id: string,
   items: UserAccountMapping[],
   slackAccount: string | undefined,
 ) {
   return {
     interactivity_pointer,
-    external_id: "userAccountMapForm",
+    view_id,
     view: {
       type: "modal",
       callback_id: "userAccountMapForm",
-      external_id: "userAccountMapForm",
       title: { "type": "plain_text", "text": "Add User-Account Mapping" },
       submit: { "type": "plain_text", "text": "Add New" },
       notify_on_close: true,
@@ -53,6 +53,7 @@ export default SlackFunction(
       if (result.ok) {
         result = await client.views.open(createViewContext(
           inputs.interactivity.interactivity_pointer,
+          "",
           result.items as UserAccountMapping[],
           inputs.slackAccount,
         ));
@@ -68,7 +69,7 @@ export default SlackFunction(
   },
 ).addBlockActionsHandler(
   ["deleteMapping"],
-  async ({ client, action, inputs }) => {
+  async ({ client, action, body, inputs }) => {
     // delete one
     try {
       let result;
@@ -77,7 +78,8 @@ export default SlackFunction(
         id: action.value,
       });
 
-      if (result.ok) {
+      const id: string | undefined = body.view?.id;
+      if (result.ok && id) {
         result = await client.apps.datastore.query({
           datastore: "userAccountMap",
         });
@@ -85,6 +87,7 @@ export default SlackFunction(
         if (result.ok) {
           result = await client.views.update(createViewContext(
             null,
+            id,
             result.items as UserAccountMapping[],
             inputs.slackAccount,
           ));
