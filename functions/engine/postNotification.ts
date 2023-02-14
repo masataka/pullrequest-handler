@@ -112,6 +112,15 @@ export default async function (
   // PreviousTS
   const previousTS = await findPreviousMessage(args);
 
+  if (
+    !previousTS &&
+    !["review_request_removed", "review_requested", "submitted"].includes(
+      webhookContext.action,
+    )
+  ) {
+    return;
+  }
+
   const renderModel = { ...webhookContext, userAccountMap, ...actualGraph };
 
   // Notification
