@@ -151,12 +151,9 @@ function Contents(props: RenderModel) {
   const text = body && body.trim();
   return (
     <Fragment>
-      <Section>[{props.repository.name}]</Section>
       <Header>{props.repository.pullRequest.title}</Header>
       <Section>
-        <b>
-          <a href={url}>#{number}</a>
-        </b>
+        <b>[{props.repository.name}] <a href={url}>#{number}</a></b>
       </Section>
       {text ? <Description text={text} /> : (
         <Section>
