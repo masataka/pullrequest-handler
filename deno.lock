@@ -702,6 +702,10 @@
     "https://esm.sh/v106/ky@0.33.2/distribution/types/ky.d.ts": "e2d296326628fde655ead9f8dd32c87ecc32b84f11511e7b4b7c3a778ba63d5a",
     "https://esm.sh/v106/ky@0.33.2/distribution/types/options.d.ts": "35bb34e6a2af7d02645bb66aef564e41457fc33f293d1aba2da397b6da8866aa",
     "https://esm.sh/v106/ky@0.33.2/distribution/types/response.d.ts": "fd7cdcf4a60ac72826774dddc27878b62ab87f74e574dfaa6a8818458f0f505d",
-    "https://esm.sh/v106/ky@0.33.2/distribution/types/retry.d.ts": "96a0e14854cadd119faac1df7e4fa92ddb0a6119fa7535b5a9b08903ecc4cf52"
+    "https://esm.sh/v106/ky@0.33.2/distribution/types/retry.d.ts": "96a0e14854cadd119faac1df7e4fa92ddb0a6119fa7535b5a9b08903ecc4cf52",
+    "https://esm.sh/v133/jsx-slack@6.0.0": "2a15af8d7f4ed75c5e169bcc1a1070ef7a51a03b7cb3a700e02e51bc91d11f2b",
+    "https://esm.sh/v133/jsx-slack@6.0.0/denonext/jsx-runtime.js": "7d2affe52eb5538cfd114ff918b71483ab84dc1c02713da8c02c7bf1bb336d13",
+    "https://esm.sh/v133/jsx-slack@6.0.0/denonext/jsx-slack.mjs": "b8a31041826419252b4cb98191298aefd38a9e5aadc6affa80920f885aee683e",
+    "https://esm.sh/v133/jsx-slack@6.0.0/jsx-runtime": "60946e499c8e51f09f9f1868ff1a0691070c9e5f6966efa68260fa1239f17dd8"
   }
 }
