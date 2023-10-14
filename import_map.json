@@ -1,7 +1,7 @@
 {
   "imports": {
-    "deno-slack-sdk/": "https://deno.land/x/deno_slack_sdk@1.5.1/",
-    "deno-slack-api/": "https://deno.land/x/deno_slack_api@1.6.0/",
-    "@octokit/webhooks-types": "https://esm.sh/@octokit/webhooks-types@6.10.0/schema.d.ts"
+    "deno-slack-sdk/": "https://deno.land/x/deno_slack_sdk@2.4.0/",
+    "deno-slack-api/": "https://deno.land/x/deno_slack_api@2.1.2/",
+    "@octokit/webhooks-types": "https://esm.sh/v133/@octokit/webhooks-types@7.3.1/schema.d.ts"
   }
 }
